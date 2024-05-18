@@ -1,4 +1,5 @@
 - 本项目支持多种文件格式，包括PDF、docx、markdown、txt等
+- 本项目支持多种model，基于mindnlp支持，请查阅[mindnlp源项目](https://github.com/mindspore-lab/mindnlp)确认支持情况
 - 本项目优化了RAG准确率
   - Chinese chunk切分优化，适配中英文混合文档
   - embedding优化，使用text2vec的sentence embedding，支持sentence embedding/字面相似度匹配算法
@@ -26,11 +27,16 @@ pip install -r requirements.txt
 ```shell
 python chatpdf.py --gen_model_type llama --gen_model_name 01-ai/Yi-6B-Chat --corpus_files sample.pdf
 ```
-
+```shell
+python chatpdf.py --gen_model_type qwen --gen_model_name Qwen/CodeQwen1.5-7B-Chat --corpus_files sample.pdf
+```
 #### 启动Web服务
 
 ```shell
 python webui.py --gen_model_type llama --gen_model_name 01-ai/Yi-6B-Chat --corpus_files sample.pdf --share
 ```
 
+```shell
+python webui.py --gen_model_type qwen --gen_model_name Qwen/CodeQwen1.5-7B-Chat --corpus_files sample.pdf
+```
 如果一切顺利，现在，你应该已经可以在浏览器地址栏中输入 http://localhost:9999 查看并使用 ChatPDF 了。
