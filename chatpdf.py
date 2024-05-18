@@ -32,7 +32,7 @@ from mindnlp.transformers import (
 
 from mindnlp.transformers.generation.streamers import TextIteratorStreamer
 from mindnlp.transformers.generation import GenerationConfig
-from langchain.text_splitter import CharacterTextSplitter
+# from langchain.text_splitter import CharacterTextSplitter
 
 jieba.setLogLevel("ERROR")
 

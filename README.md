@@ -17,9 +17,8 @@
 pip install -r requirements.txt
 ```
 
-如果您在使用Windows，建议通过WSL，在Linux上安装。如果您没有安装CUDA，并且不想只用CPU跑大模型，请先安装CUDA。
 
-如果下载慢，建议配置豆瓣源。
+如果下载慢，建议配置豆瓣源或清华源。
 
 #### 本地调用
 
