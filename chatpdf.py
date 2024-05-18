@@ -38,11 +38,10 @@ from mindnlp.transformers.generation import GenerationConfig
 jieba.setLogLevel("ERROR")
 
 MODEL_CLASSES = {
-    # "bloom": (BloomForCausalLM, BloomTokenizerFast),
-    "chatglm": (AutoModelForSeq2SeqLM, AutoTokenizer), #有bug还未解决
+    "chatglm": (AutoModelForSeq2SeqLM, AutoTokenizer), #有bug还未解决 无法使用
     "llama": (LlamaForCausalLM, LlamaTokenizer),
-    # "baichuan": (AutoModelForCausalLM, AutoTokenizer)
-    # "auto": (AutoModelForSeq2SeqLM, AutoTokenizer),
+    "qwen": (Qwen2ForCausalLM, AutoTokenizer),
+    "auto": (AutoModelForSeq2SeqLM, AutoTokenizer)
 }
 
 # from huggingface_hub import login
