@@ -24,6 +24,8 @@ from mindnlp.transformers import (
     BloomTokenizerFast,
     LlamaTokenizer,
     LlamaForCausalLM,
+    Qwen2Tokenizer,
+    Qwen2ForCausalLM,
     # TextIteratorStreamer,
     # GenerationConfig,
     AutoModelForSequenceClassification,
@@ -33,7 +35,6 @@ from mindnlp.transformers import (
 from mindnlp.transformers.generation.streamers import TextIteratorStreamer
 from mindnlp.transformers.generation import GenerationConfig
 # from langchain.text_splitter import CharacterTextSplitter
-
 jieba.setLogLevel("ERROR")
 
 MODEL_CLASSES = {
@@ -181,6 +182,7 @@ class ChatPDF:
         if similarity_model is not None:
             self.sim_model = similarity_model
         else:
+
             m1 = BertSimilarity(model_name_or_path="shibing624/text2vec-base-multilingual")
             m2 = BM25Similarity()
             default_sim_model = EnsembleSimilarity(similarities=[m1, m2], weights=[0.5, 0.5], c=2)
@@ -224,8 +226,10 @@ class ChatPDF:
         """Init generate model."""
         model_class, tokenizer_class = MODEL_CLASSES[gen_model_type]
 
+
         tokenizer = tokenizer_class.from_pretrained(gen_model_name_or_path, trust_remote_code=True)
         model = model_class.from_pretrained(
+            gen_model_name_or_path
         )
         try:
             model.generation_config = GenerationConfig.from_pretrained(gen_model_name_or_path, trust_remote_code=True)
@@ -297,10 +301,8 @@ class ChatPDF:
                 corpus = self.extract_text_from_txt(doc_file)
             full_text = '\n'.join(corpus)
             chunks = self.text_splitter.split_text(full_text)
-
             #使用langchain方法
             # chunks = self.text_splitter.split_documents(full_text)
-
             self.sim_model.add_corpus(chunks)
         self.corpus_files = files
         logger.debug(f"files: {files}, corpus size: {len(self.sim_model.corpus)}, top3: "
@@ -379,7 +381,6 @@ class ChatPDF:
         pairs = []
         for reference in reference_results:
             pairs.append([query, reference])
-
         inputs = self.rerank_tokenizer(pairs, padding=True, truncation=True, return_tensors='ms', max_length=512)
         inputs_on_device = {k: v for k, v in inputs.items()}
         scores = self.rerank_model(**inputs_on_device, return_dict=True).logits.view(-1, ).float()
@@ -513,7 +514,7 @@ if __name__ == "__main__":
     parser.add_argument("--gen_model_type", type=str, default="auto")
     parser.add_argument("--gen_model_name", type=str, default="01-ai/Yi-6B-Chat")
     parser.add_argument("--lora_model", type=str, default=None)
-    parser.add_argument("--rerank_model_name", type=str, default="")
+    parser.add_argument("--rerank_model_name", type=str, default="../models/bce-reranker-base_v1")
     parser.add_argument("--corpus_files", type=str, default="sample.pdf")
     # parser.add_argument("--device", type=str, default=None)
     parser.add_argument("--int4", action='store_true', help="use int4 quantization")
