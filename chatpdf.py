@@ -20,8 +20,6 @@ from mindnlp.transformers import (
     AutoModel,
     AutoModelForCausalLM,
     AutoTokenizer,
-    BloomForCausalLM,
-    BloomTokenizerFast,
     LlamaTokenizer,
     LlamaForCausalLM,
     Qwen2Tokenizer,
@@ -44,9 +42,6 @@ MODEL_CLASSES = {
     "auto": (AutoModelForSeq2SeqLM, AutoTokenizer)
 }
 
-# from huggingface_hub import login
- 
-# login()
 
 PROMPT_TEMPLATE = """基于以下已知信息，简洁和专业的来回答用户的问题。
 如果无法从中得到答案，请说 "根据已知信息无法回答该问题" 或 "没有提供足够的相关信息"，不允许在答案中添加编造成分，答案请使用中文。
@@ -132,7 +127,6 @@ class ChatPDF:
             lora_model_name_or_path: str = None,
             corpus_files: Union[str, List[str]] = None,
             save_corpus_emb_dir: str = "./corpus_embs/",
-            # device: str = None,
             int8: bool = False,
             int4: bool = False,
             chunk_size: int = 250,
@@ -162,13 +156,7 @@ class ChatPDF:
         :param similarity_top_k: similarity_top_k, default 5, similarity model search k corpus chunks
         :param rerank_top_k: rerank_top_k, default 3, rerank model search k corpus chunks
         """
-        # if torch.cuda.is_available():
-        #     default_device = torch.device(0)
-        # elif torch.backends.mps.is_available():
-        #     default_device = torch.device('cpu')
-        # else:
-        #     default_device = torch.device('cpu')
-        # self.device = device or default_device
+
         if num_expand_context_chunk > 0 and chunk_overlap > 0:
             logger.warning(f" 'num_expand_context_chunk' and 'chunk_overlap' cannot both be greater than zero. "
                            f" 'chunk_overlap' has been set to zero by default.")
@@ -237,11 +225,9 @@ class ChatPDF:
         if peft_name:
             model = PeftModel.from_pretrained(
                 model,
-                peft_name#,
-                # torch_dtype="auto",
+                peft_name
             )
             logger.info(f"Loaded peft model from {peft_name}")
-        # model.eval()
         return model, tokenizer
 
     def _get_chat_input(self):
@@ -257,10 +243,8 @@ class ChatPDF:
             add_generation_prompt=True,
             return_tensors='ms'
         )
-        # return input_ids.to(self.gen_model.device)
         return input_ids
 
-    # @torch.inference_mode()
     def stream_generate_answer(
             self,
             max_new_tokens=512,
@@ -514,9 +498,7 @@ if __name__ == "__main__":
     parser.add_argument("--gen_model_name", type=str, default="01-ai/Yi-6B-Chat")
     parser.add_argument("--lora_model", type=str, default=None)
     parser.add_argument("--rerank_model_name", type=str, default="maidalun1020/bce-reranker-base_v1")
-    # parser.add_argument("--rerank_model_name", type=str, default="../models/bce-reranker-base_v1")
     parser.add_argument("--corpus_files", type=str, default="sample.pdf")
-    # parser.add_argument("--device", type=str, default=None)
     parser.add_argument("--int4", action='store_true', help="use int4 quantization")
     parser.add_argument("--int8", action='store_true', help="use int8 quantization")
     parser.add_argument("--chunk_size", type=int, default=220)
@@ -524,14 +506,13 @@ if __name__ == "__main__":
     parser.add_argument("--num_expand_context_chunk", type=int, default=1)
     args = parser.parse_args()
     print(args)
-    # sim_model = BertSimilarity(model_name_or_path=args.sim_model_name, device=args.device)
+
     sim_model = BertSimilarity(model_name_or_path=args.sim_model_name)
     m = ChatPDF(
         similarity_model=sim_model,
         generate_model_type=args.gen_model_type,
         generate_model_name_or_path=args.gen_model_name,
         lora_model_name_or_path=args.lora_model,
-        # device=args.device,
         int4=args.int4,
         int8=args.int8,
         chunk_size=args.chunk_size,
